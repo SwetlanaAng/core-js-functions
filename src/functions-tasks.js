@@ -121,8 +121,17 @@ function getPolynom(...args) {
  *   ...
  *   memoizer() => the same random number  (next run, returns the previous cached result)
  */
-function memoize(/* func */) {
-  throw new Error('Not implemented');
+function memoize(func) {
+  const cache = {};
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (cache[key]) {
+      return cache[key];
+    }
+    const result = func.apply(this, args);
+    cache[key] = result;
+    return result;
+  };
 }
 
 /**
@@ -140,8 +149,20 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  return () => {
+    let counter = 0;
+    let ans;
+    while (counter < attempts) {
+      try {
+        ans = func();
+        counter += 1;
+      } catch (err) {
+        counter += 1;
+      }
+    }
+    return ans;
+  };
 }
 
 /**
@@ -167,8 +188,14 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return (...args) => {
+    const argsString = args.map((item) => JSON.stringify(item)).join(',');
+    logFunc(`${func.name}(${argsString}) starts`);
+    const result = func(...args);
+    logFunc(`${func.name}(${argsString}) ends`);
+    return result;
+  };
 }
 
 /**
@@ -184,8 +211,10 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  return (...args2) => {
+    return fn(...args1.concat(args2));
+  };
 }
 
 /**
@@ -205,8 +234,13 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  let num = startFrom - 1;
+
+  return () => {
+    num += 1;
+    return num;
+  };
 }
 
 module.exports = {
